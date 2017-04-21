@@ -82,6 +82,10 @@ namespace Microsoft.Bot.Builder.Dialogs
         None
     }
 
+    /// <summary>
+    /// Options for <see cref="PromptDialog"/>.
+    /// </summary>
+    /// <typeparam name="T"> The type of the options.</typeparam>
     public interface IPromptOptions<T>
     {
         /// <summary>
@@ -148,6 +152,9 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// </summary>
         string DefaultRetrySpeak { get; set; }
 
+        /// <summary>
+        /// Entity Recognizer to parse the message content
+        /// </summary>
         IPromptRecognizer Recognizer { get; }
     }
 
