@@ -112,7 +112,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <summary>
         /// The choices and synonyms to be returned when selected.
         /// </summary>
-        IReadOnlyDictionary<T, IReadOnlyList<T>> Choices { get; }
+        IReadOnlyDictionary<T, IReadOnlyList<string>> Choices { get; }
 
         /// <summary>
         /// The description of each possible option.
@@ -188,7 +188,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <summary>
         /// The choices and synonyms to be returned when selected.
         /// </summary>
-        public IReadOnlyDictionary<T, IReadOnlyList<T>> Choices { get { return this.promptOptionsWithChoices.Choices; } }
+        public IReadOnlyDictionary<T, IReadOnlyList<string>> Choices { get { return this.promptOptionsWithChoices.Choices; } }
 
         /// <summary>
         /// The description of each possible option.
@@ -264,7 +264,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <param name="recognizer"> Entity Recognizer to parse the message content.</param>
         public PromptOptions(string prompt, string retry = null, string tooManyAttempts = null, IReadOnlyList<T> options = null, int attempts = 3, PromptStyler promptStyler = null, IReadOnlyList<string> descriptions = null, string speak = null, string retrySpeak = null, IPromptRecognizer recognizer = null)
         {
-            var choices = options != null ? new ReadOnlyDictionary<T, IReadOnlyList<T>>(options.ToDictionary(x => x, x => (IReadOnlyList<T>)Enumerable.Empty<T>().ToList().AsReadOnly())) : null;
+            var choices = options != null ? new ReadOnlyDictionary<T, IReadOnlyList<string>>(options.ToDictionary(x => x, x => (IReadOnlyList<string>)Enumerable.Empty<string>().ToList().AsReadOnly())) : null;
             this.promptOptionsWithChoices = new PromptOptionsWithSynonyms<T>(
                 prompt,
                 retry,
@@ -314,7 +314,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <summary>
         /// The choices and synonyms to be returned when selected.
         /// </summary>
-        public IReadOnlyDictionary<T, IReadOnlyList<T>> Choices { get; }
+        public IReadOnlyDictionary<T, IReadOnlyList<string>> Choices { get; }
 
         /// <summary>
         /// The description of each possible option.
@@ -376,7 +376,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <param name="speak"> The Speak tag (SSML markup for text to speech).</param>
         /// <param name="retrySpeak"> What to display on retry Speak (SSML markup for text to speech).</param>
         /// <param name="recognizer"> Entity Recognizer to parse the message content.</param>
-        public PromptOptionsWithSynonyms(string prompt, string retry = null, string tooManyAttempts = null, IReadOnlyDictionary<T, IReadOnlyList<T>> choices = null, int attempts = 3, PromptStyler promptStyler = null, IReadOnlyList<string> descriptions = null, string speak = null, string retrySpeak = null, IPromptRecognizer recognizer = null)
+        public PromptOptionsWithSynonyms(string prompt, string retry = null, string tooManyAttempts = null, IReadOnlyDictionary<T, IReadOnlyList<string>> choices = null, int attempts = 3, PromptStyler promptStyler = null, IReadOnlyList<string> descriptions = null, string speak = null, string retrySpeak = null, IPromptRecognizer recognizer = null)
         {
             if (string.IsNullOrEmpty(prompt))
             {
@@ -604,9 +604,9 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <param name="recognizeNumbers">(Optional) if true, the prompt will attempt to recognize ordinals like "the first one" or "the second one" as the index of the choice to return. The default value is "true".</param>
         /// <param name="recognizeOrdinals">(Optional) if true, the prompt will attempt to recognize the selected value using the choices themselves. The default value is "true".</param>
         /// <param name="minScore">(Optional) minimum score from 0.0 - 1.0 needed for a recognized choice to be considered a match. The default value is "0.4".</param>
-        public static void Choice<T>(IDialogContext context, ResumeAfter<T> resume, IDictionary<T, IEnumerable<T>> choices, string prompt, string retry = null, int attempts = 3, PromptStyle promptStyle = PromptStyle.Auto, IEnumerable<string> descriptions = null, bool recognizeChoices = true, bool recognizeNumbers = true, bool recognizeOrdinals = true, double minScore = 0.4)
+        public static void Choice<T>(IDialogContext context, ResumeAfter<T> resume, IDictionary<T, IEnumerable<string>> choices, string prompt, string retry = null, int attempts = 3, PromptStyle promptStyle = PromptStyle.Auto, IEnumerable<string> descriptions = null, bool recognizeChoices = true, bool recognizeNumbers = true, bool recognizeOrdinals = true, double minScore = 0.4)
         {
-            Choice(context, resume, new PromptOptionsWithSynonyms<T>(prompt, retry, attempts: attempts, choices: choices.ToDictionary(x => x.Key, x => (IReadOnlyList<T>)x.Value.ToList().AsReadOnly()), promptStyler: new PromptStyler(promptStyle), descriptions: descriptions?.ToList()), recognizeChoices, recognizeNumbers, recognizeOrdinals, minScore: minScore);
+            Choice(context, resume, new PromptOptionsWithSynonyms<T>(prompt, retry, attempts: attempts, choices: choices.ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Value.ToList().AsReadOnly()), promptStyler: new PromptStyler(promptStyle), descriptions: descriptions?.ToList()), recognizeChoices, recognizeNumbers, recognizeOrdinals, minScore: minScore);
         }
 
         /// <summary>
@@ -662,7 +662,7 @@ namespace Microsoft.Bot.Builder.Dialogs
                 this.promptOptions.DefaultRetry = this.DefaultRetry;
             }
 
-            protected override bool TryParse(IMessageActivity message, out string result)
+            public override bool TryParse(IMessageActivity message, out string result)
             {
                 if (!string.IsNullOrWhiteSpace(message.Text))
                 {
@@ -691,6 +691,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         public sealed class PromptConfirm : Prompt<bool, string>
         {
             private string[][] patterns;
+            private PromptChoice<bool> innerPrompt;
 
             /// <summary>
             /// Index of yes descriptions.
@@ -746,25 +747,26 @@ namespace Microsoft.Bot.Builder.Dialogs
             {
                 this.patterns = patterns ?? Patterns;
                 this.promptOptions.DefaultRetry = this.DefaultRetry;
+
+                var choices = new Dictionary<bool, IReadOnlyList<string>>
+                {
+                    { true, this.patterns[Yes].Select(x => x.ToLowerInvariant()).ToList().AsReadOnly() },
+                    { false, this.patterns[No].Select(x => x.ToLowerInvariant()).ToList().AsReadOnly() }
+                };
+                var promptChoiceOptions = new PromptOptionsWithSynonyms<bool>(promptOptions.Prompt, promptOptions.Retry, promptOptions.TooManyAttempts, choices,
+                    promptOptions.Attempts, promptOptions.PromptStyler, null, promptOptions.Speak, promptOptions.RetrySpeak, promptOptions.Recognizer);
+
+                this.innerPrompt = new PromptChoice<bool>(promptChoiceOptions);
             }
 
-            protected override bool TryParse(IMessageActivity message, out bool result)
+            public override bool TryParse(IMessageActivity message, out bool result)
             {
-                if (!string.IsNullOrEmpty(message.Text))
+                if (!this.innerPrompt.TryParse(message, out result))
                 {
-                    var choices = new Dictionary<string, IReadOnlyList<string>>();
-                    choices.Add(Yes.ToString(), this.patterns[Yes].Select(x => x.ToLowerInvariant()).ToList().AsReadOnly());
-                    choices.Add(No.ToString(), this.patterns[No].Select(x => x.ToLowerInvariant()).ToList().AsReadOnly());
-                    var matches = this.promptOptions.Recognizer.RecognizeChoices(message, choices);
-                    var topMatch = matches.MaxBy(x => x.Score);
-                    if (topMatch != null && topMatch.Score > 0)
-                    {
-                        result = topMatch.Entity == Yes.ToString();
-                        return true;
-                    }
+                    result = false;
+                    return false;
                 }
-                result = false;
-                return false;
+                return true;
             }
 
             public string DefaultRetry
@@ -793,7 +795,7 @@ namespace Microsoft.Bot.Builder.Dialogs
             public PromptInt64(IPromptOptions<long> promptOptions)
                 : base(promptOptions) { }
 
-            protected override bool TryParse(IMessageActivity message, out Int64 result)
+            public override bool TryParse(IMessageActivity message, out Int64 result)
             {
                 var matches = this.promptOptions.Recognizer.RecognizeInteger(message);
                 var topMatch = matches?.MaxBy(x => x.Score);
@@ -824,7 +826,7 @@ namespace Microsoft.Bot.Builder.Dialogs
             public PromptDouble(IPromptOptions<double> promptOptions)
                 : base(promptOptions) { }
 
-            protected override bool TryParse(IMessageActivity message, out double result)
+            public override bool TryParse(IMessageActivity message, out double result)
             {
                 var matches = this.promptOptions.Recognizer.RecognizeDouble(message);
                 var topMatch = matches?.MaxBy(x => x.Score);
@@ -875,8 +877,8 @@ namespace Microsoft.Bot.Builder.Dialogs
             /// <param name="recognizeNumbers">(Optional) if true, the prompt will attempt to recognize ordinals like "the first one" or "the second one" as the index of the choice to return. The default value is "true".</param>
             /// <param name="recognizeOrdinals">(Optional) if true, the prompt will attempt to recognize the selected value using the choices themselves. The default value is "true".</param>
             /// <param name="minScore">(Optional) minimum score from 0.0 - 1.0 needed for a recognized choice to be considered a match. The default value is "0.4".</param>
-            public PromptChoice(IDictionary<T, IEnumerable<T>> choices, string prompt, string retry, int attempts, PromptStyle promptStyle = PromptStyle.Auto, IEnumerable<string> descriptions = null, bool recognizeChoices = true, bool recognizeNumbers = true, bool recognizeOrdinals = true, double minScore = 0.4)
-                : this(new PromptOptionsWithSynonyms<T>(prompt, retry, choices: choices.ToDictionary(x => x.Key, x => (IReadOnlyList<T>)x.Value.ToList().AsReadOnly()), attempts: attempts, promptStyler: new PromptStyler(promptStyle), descriptions: descriptions?.ToList()), recognizeChoices, recognizeNumbers, recognizeOrdinals, minScore)
+            public PromptChoice(IDictionary<T, IEnumerable<string>> choices, string prompt, string retry, int attempts, PromptStyle promptStyle = PromptStyle.Auto, IEnumerable<string> descriptions = null, bool recognizeChoices = true, bool recognizeNumbers = true, bool recognizeOrdinals = true, double minScore = 0.4)
+                : this(new PromptOptionsWithSynonyms<T>(prompt, retry, choices: choices.ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Value.ToList().AsReadOnly()), attempts: attempts, promptStyler: new PromptStyler(promptStyle), descriptions: descriptions?.ToList()), recognizeChoices, recognizeNumbers, recognizeOrdinals, minScore)
             {
             }
 
@@ -898,7 +900,7 @@ namespace Microsoft.Bot.Builder.Dialogs
                 this.minScore = minScore;
             }
 
-            protected override bool TryParse(IMessageActivity message, out T result)
+            public override bool TryParse(IMessageActivity message, out T result)
             {
                 if (!string.IsNullOrWhiteSpace(message.Text))
                 {
@@ -973,7 +975,7 @@ namespace Microsoft.Bot.Builder.Dialogs
                 this.ContentTypes = contentTypes ?? new List<string>();
             }
 
-            protected override bool TryParse(IMessageActivity message, out IEnumerable<Attachment> result)
+            public override bool TryParse(IMessageActivity message, out IEnumerable<Attachment> result)
             {
                 if (message.Attachments != null && message.Attachments.Any())
                 {
@@ -1116,7 +1118,7 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
             }
         }
 
-        protected abstract bool TryParse(IMessageActivity message, out T result);
+        public abstract bool TryParse(IMessageActivity message, out T result);
 
         protected virtual IMessageActivity MakePrompt(IDialogContext context, string prompt, IReadOnlyList<U> options = null, IReadOnlyList<string> descriptions = null, string speak = null)
         {
