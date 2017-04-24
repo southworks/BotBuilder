@@ -103,7 +103,7 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <param name="message">Message context.</param>
         /// <param name="choicesDictionary">Dictionary with the options to choose from as a key and their synonyms as a value.</param>
         /// <param name="options">Options of the Recognizer. <see cref="IPromptRecognizeChoicesOptions" /></param>
-        IEnumerable<RecognizeEntity<T>> RecognizeChoices<T>(IMessageActivity message, IReadOnlyDictionary<T, IReadOnlyList<string>> choicesDictionary, IPromptRecognizeChoicesOptions options = null);
+        IEnumerable<RecognizeEntity<T>> RecognizeChoices<T>(IMessageActivity message, IReadOnlyDictionary<T, IReadOnlyList<T>> choicesDictionary, IPromptRecognizeChoicesOptions options = null);
 
         /// <summary>Recognizer for a number.</summary>
         /// <param name="message">Message context.</param>
@@ -286,17 +286,17 @@ namespace Microsoft.Bot.Builder.Dialogs
             return entities;
         }
         
-        public IEnumerable<RecognizeEntity<T>> RecognizeChoices<T>(IMessageActivity message, IReadOnlyDictionary<T, IReadOnlyList<string>> choicesDictionary, IPromptRecognizeChoicesOptions options = null)
+        public IEnumerable<RecognizeEntity<T>> RecognizeChoices<T>(IMessageActivity message, IReadOnlyDictionary<T, IReadOnlyList<T>> choicesDictionary, IPromptRecognizeChoicesOptions options = null)
         {
             var entities = new List<RecognizeEntity<T>>();
             var index = 0;
             foreach (var choices in choicesDictionary)
             {
-                var values = choices.Value?.ToList() ?? new List<string>();
+                var values = choices.Value?.ToList() ?? new List<T>();
                 var excludeValue = options?.ExcludeValue ?? false;
                 if (!excludeValue)
                 {
-                    values.Add(choices.Key.ToString());
+                    values.Add(choices.Key);
                 }
                 var match = RecognizeValues(message, values, options).MaxBy(x => x.Score);
                 if (match != null)
