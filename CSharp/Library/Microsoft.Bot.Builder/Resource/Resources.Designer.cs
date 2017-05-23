@@ -376,6 +376,33 @@ namespace Microsoft.Bot.Builder.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please submit an attachment for {&amp;}.
+        /// </summary>
+        public static string TemplateArrayOfByte {
+            get {
+                return ResourceManager.GetString("TemplateArrayOfByte", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Array of {0} Bytes.
+        /// </summary>
+        public static string TemplateArrayOfByteDescription {
+            get {
+                return ResourceManager.GetString("TemplateArrayOfByteDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please attach a valid file containing your data.
+        /// </summary>
+        public static string TemplateArrayOfByteHelp {
+            get {
+                return ResourceManager.GetString("TemplateArrayOfByteHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Would you like a {&amp;}? {||}.
         /// </summary>
         public static string TemplateBool {
