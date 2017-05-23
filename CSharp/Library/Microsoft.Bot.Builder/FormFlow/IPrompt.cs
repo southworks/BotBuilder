@@ -660,10 +660,17 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                         var value = pathDesc.GetValue(state);
                         if (value.GetType() != typeof(string) && value.GetType().IsIEnumerable())
                         {
-                            var values = (value as System.Collections.IEnumerable);
-                            substitute = Language.BuildList(from elt in values.Cast<object>()
-                                                            select Language.Normalize(ValueDescription(pathDesc, elt, "0"), _annotation.ValueCase),
-                                _annotation.Separator, _annotation.LastSeparator);
+                            if (value.GetType().IsArray && value.GetType().GetElementType() == typeof(byte))
+                            {
+                                substitute = string.Format(Resources.TemplateArrayOfByteDescription, (value as Array).Length);
+                            }
+                            else
+                            {
+                                var values = (value as System.Collections.IEnumerable);
+                                substitute = Language.BuildList(from elt in values.Cast<object>()
+                                                                select Language.Normalize(ValueDescription(pathDesc, elt, "0"), _annotation.ValueCase),
+                                    _annotation.Separator, _annotation.LastSeparator);
+                            }
                         }
                         else
                         {

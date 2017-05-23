@@ -320,6 +320,9 @@ namespace Microsoft.Bot.Builder.FormFlow
         /// </summary>
         public List<TemplateAttribute> Templates = new List<TemplateAttribute>
         {
+            new TemplateAttribute(TemplateUsage.ArrayOfByte, Resources.TemplateArrayOfByte),
+            new TemplateAttribute(TemplateUsage.ArrayOfByteHelp, Resources.TemplateArrayOfByteHelp),
+
             new TemplateAttribute(TemplateUsage.Bool, Resources.TemplateBool),
             // {0} is current choice, {1} is no preference
             new TemplateAttribute(TemplateUsage.BoolHelp, Resources.TemplateBoolHelp),

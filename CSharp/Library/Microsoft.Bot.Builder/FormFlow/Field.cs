@@ -675,6 +675,10 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                 {
                     usage = TemplateUsage.DateTime;
                 }
+                else if (_type.IsArray && _type.GetElementType() == typeof(byte))
+                {
+                    usage = TemplateUsage.ArrayOfByte;
+                }
                 else
                 {
                     throw new ArgumentException($"{_name} is not a type FormFlow understands.");
@@ -722,6 +726,10 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                     if (elt.IsEnum)
                     {
                         _recognizer = new RecognizeEnumeration<T>(this);
+                    }
+                    else if (_type.IsArray && elt == typeof(byte))
+                    {
+                        _recognizer = new RecognizeAttachment<T>(this);
                     }
                 }
                 _buildPrompts = true;

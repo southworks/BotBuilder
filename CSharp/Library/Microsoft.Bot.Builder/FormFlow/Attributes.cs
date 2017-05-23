@@ -324,6 +324,16 @@ namespace Microsoft.Bot.Builder.FormFlow
         None,
 
         /// <summary>
+        /// How to ask for an array of bytes. 
+        /// </summary>
+        ArrayOfByte,
+
+        /// <summary>
+        /// What you can enter when entering a byte array.
+        /// </summary>
+        ArrayOfByteHelp,
+
+        /// <summary>
         /// How to ask for a boolean.
         /// </summary>
         Bool,

@@ -107,7 +107,11 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                     var utype = Nullable.GetUnderlyingType(ftype) ?? ftype;
                     if (ftype.IsIEnumerable())
                     {
-                        if (value != null && ftype != typeof(string))
+                        if (ftype.IsArray && ftype.GetElementType() == typeof(byte))
+                        {
+                            newValue = value;
+                        }
+                        else if (value != null && ftype != typeof(string))
                         {
                             // Build list and coerce elements
                             var list = Activator.CreateInstance(ftype);
@@ -275,12 +279,20 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                     else if (ftype.IsIEnumerable())
                     {
                         var elt = ftype.GetGenericElementType();
-                        _type = elt;
-                        _allowsMultiple = true;
-                        ProcessFieldAttributes(field);
-                        if (elt.IsEnum)
+                        if (ftype.IsArray && elt == typeof(byte))
                         {
-                            ProcessEnumAttributes(elt);
+                            _type = ftype;
+                            ProcessFieldAttributes(field);
+                        }
+                        else
+                        {
+                            _type = elt;
+                            _allowsMultiple = true;
+                            ProcessFieldAttributes(field);
+                            if (elt.IsEnum)
+                            {
+                                ProcessEnumAttributes(elt);
+                            }
                         }
                     }
                     else

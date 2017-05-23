@@ -184,7 +184,9 @@ namespace Microsoft.Bot.Builder.FormFlow
 
         private Dictionary<TemplateUsage, int> _templateArgs = new Dictionary<TemplateUsage, int>
         {
-            {TemplateUsage.Bool, 0 },
+            { TemplateUsage.ArrayOfByte, 0 },
+            { TemplateUsage.ArrayOfByteHelp, 1 },
+            { TemplateUsage.Bool, 0 },
             { TemplateUsage.BoolHelp, 1},
             { TemplateUsage.Clarify, 1},
             { TemplateUsage.Confirmation, 0 },
@@ -480,6 +482,10 @@ namespace Microsoft.Bot.Builder.FormFlow
                 {
                     var elt = type.GetGenericElementType();
                     if (elt.IsEnum)
+                    {
+                        paths.Add(path);
+                    }
+                    else if(type.IsArray && type.GetElementType() == typeof(byte)) // support array of bytes
                     {
                         paths.Add(path);
                     }
