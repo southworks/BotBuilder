@@ -40,6 +40,7 @@ using System.Text.RegularExpressions;
 using Chronic;
 using System.Threading;
 using Microsoft.Bot.Connector;
+using System.Net.Http;
 
 namespace Microsoft.Bot.Builder.FormFlow.Advanced
 {
@@ -768,5 +769,65 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         }
 
         private Parser _parser;
+    }
+
+    /// <summary>
+    /// Recognize an attachment within the activity instance.
+    /// </summary>
+    /// <typeparam name="T">Form state.</typeparam>
+    public sealed class RecognizeAttachment<T> : RecognizePrimitive<T>
+        where T : class
+    {
+        public RecognizeAttachment(IField<T> field)
+            : base(field)
+        { }
+
+        public override string Help(T state, object defaultValue)
+        {
+            var prompt = new Prompter<T>(_field.Template(TemplateUsage.ArrayOfByteHelp), _field.Form, null);
+            return prompt.Prompt(state, _field, new object[] { }).Prompt;
+        }
+
+        public override TermMatch Parse(string input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override DescribeAttribute ValueDescription(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IEnumerable<string> ValidInputs(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IEnumerable<TermMatch> Matches(IMessageActivity input, object defaultValue = null)
+        {
+            var result = new List<TermMatch>();
+
+            var attachment = input.Attachments.FirstOrDefault();
+            if (attachment != null)
+            {
+                if (attachment.Content == null)
+                {
+                    using (HttpClient httpClient = new HttpClient())
+                    {
+                        // TODO: handle specific channel stuff - ie. authorization, etc
+                        attachment.Content = httpClient.GetByteArrayAsync(attachment.ContentUrl).Result;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(input.Text))
+                {
+                    input.Text = string.Empty;
+                }
+
+                result.Add(new TermMatch(0, input.Text.Length, 1.0, attachment.Content));
+            }
+
+            return result;
+        }
     }
 }
