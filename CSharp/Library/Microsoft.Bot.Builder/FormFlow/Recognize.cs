@@ -37,14 +37,24 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Chronic;
 using System.Threading;
+
+using Chronic;
+
 using Microsoft.Recognizers.Text;
-using Microsoft.Recognizers.Text.Number.Parsers;
-using Microsoft.Recognizers.Text.Number.Spanish.Parsers;
-using Microsoft.Recognizers.Text.Number.Models;
+using Microsoft.Recognizers.Text.DateTime;
+using Microsoft.Recognizers.Text.DateTime.English.Extractors;
+using Microsoft.Recognizers.Text.DateTime.English.Parsers;
+using Microsoft.Recognizers.Text.DateTime.Extractors;
+using Microsoft.Recognizers.Text.DateTime.Models;
+using Microsoft.Recognizers.Text.DateTime.Parsers;
+using Microsoft.Recognizers.Text.DateTime.Spanish.Extractors;
+using Microsoft.Recognizers.Text.DateTime.Spanish.Parsers;
 using Microsoft.Recognizers.Text.Number.English.Parsers;
 using Microsoft.Recognizers.Text.Number.Extractors;
+using Microsoft.Recognizers.Text.Number.Models;
+using Microsoft.Recognizers.Text.Number.Parsers;
+using Microsoft.Recognizers.Text.Number.Spanish.Parsers;
 
 namespace Microsoft.Bot.Builder.FormFlow.Advanced
 {
@@ -728,6 +738,8 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     public sealed class RecognizeDateTime<T> : RecognizePrimitive<T>
         where T : class
     {
+        private readonly IModel _model;
+
         /// <summary>
         /// Construct a date/time recognizer.
         /// </summary>
@@ -735,14 +747,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         public RecognizeDateTime(IField<T> field)
             : base(field)
         {
-            var format = Thread.CurrentThread.CurrentUICulture.DateTimeFormat.ShortDatePattern.ToLower();
-            var options = new Chronic.Options();
-            options.EndianPrecedence = EndianPrecedence.Middle;
-            if (format.IndexOf('d') < format.IndexOf('m'))
-            {
-                options.EndianPrecedence = EndianPrecedence.Little;
-            }
-            _parser = new Chronic.Parser(options);
+            _model = RecognizeDateTimeHelper.BuildModel(field.Form.Resources.Culture);
         }
 
         public override string Help(T state, object defaultValue)
@@ -755,22 +760,13 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         public override TermMatch Parse(string input)
         {
             TermMatch match = null;
-            if (Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName != "en")
+
+            DateTime datetime;
+            if (RecognizeDateTimeHelper.ParsedWithModel(_model, input, _field.Form.Resources.Culture, out datetime))
             {
-                DateTime dt;
-                if (DateTime.TryParse(input, Thread.CurrentThread.CurrentUICulture.DateTimeFormat, DateTimeStyles.None, out dt))
-                {
-                    match = new TermMatch(0, input.Length, 1.0, dt);
-                }
+                match = new TermMatch(0, input.Length, 1.0, datetime);
             }
-            else
-            {
-                var parse = _parser.Parse(input);
-                if (parse != null && parse.Start.HasValue)
-                {
-                    match = new TermMatch(0, input.Length, 1.0, parse.Start.Value);
-                }
-            }
+
             return match;
         }
 
@@ -783,8 +779,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         {
             return new DescribeAttribute(((DateTime)value).ToString(Thread.CurrentThread.CurrentUICulture.DateTimeFormat));
         }
-
-        private Parser _parser;
     }
 
     #region helpers
@@ -819,12 +813,58 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         {
             result = 0;
 
-            var parseResult = model.Parse(input).FirstOrDefault(r => r.TypeName.Equals("number"));
-            if (parseResult != null && parseResult.Resolution.ContainsKey("value"))
+            var parseResult = model.Parse(input).FirstOrDefault(r => r.TypeName.Contains("number"));
+            if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("value"))
             {
                 try
                 {
                     result = Convert.ToDouble(parseResult.Resolution["value"], culture);
+                    return true;
+                }
+                catch
+                {
+                    // do nothing - will return false
+                }
+            }
+
+            return false;
+        }
+    }
+
+    internal static class RecognizeDateTimeHelper
+    {
+        internal static IModel BuildModel(CultureInfo culture)
+        {
+            var extractor = default(IExtractor);
+            var parser = default(IDateTimeParser);
+
+            if (culture.TwoLetterISOLanguageName.Equals("es"))
+            {
+                parser = new BaseMergedParser(new SpanishMergedParserConfiguration());
+                extractor = new BaseMergedExtractor(new SpanishMergedExtractorConfiguration());
+
+            }
+            else // defaulting to english
+            {
+                parser = new BaseMergedParser(new EnglishMergedParserConfiguration());
+                extractor = new BaseMergedExtractor(new EnglishMergedExtractorConfiguration());
+            }
+
+            return new DateTimeModel(parser, extractor);
+        }
+
+        internal static bool ParsedWithModel(IModel model, string input, CultureInfo culture, out DateTime result)
+        {
+            result = default(DateTime);
+
+            var parseResult = model.Parse(input).FirstOrDefault(r => r.TypeName.Contains("date"));
+            if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("values"))
+            {
+                var values = (parseResult.Resolution["values"] as IList<Dictionary<string, string>>).Last();
+
+                try
+                {
+                    result = Convert.ToDateTime(values["value"], culture);
                     return true;
                 }
                 catch
