@@ -39,8 +39,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-using Chronic;
-
 using Microsoft.Recognizers.Text;
 using Microsoft.Recognizers.Text.DateTime;
 using Microsoft.Recognizers.Text.DateTime.English.Extractors;
@@ -786,27 +784,21 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     {
         internal static IModel BuildModel(CultureInfo culture)
         {
-            var model = default(IModel);
+            var extractor = default(IExtractor);
+            var parser = default(IParser);
 
-            if (culture.Name.StartsWith("es"))
+            if (culture.TwoLetterISOLanguageName.Equals("es"))
             {
-                model = new NumberModel(
-                    AgnosticNumberParserFactory.GetParser(
-                        AgnosticNumberParserType.Number,
-                        new SpanishNumberParserConfiguration()),
-                    new Recognizers.Text.Number.Spanish.Extractors.NumberExtractor(NumberMode.PureNumber));
-
+                extractor = new Recognizers.Text.Number.Spanish.Extractors.NumberExtractor(NumberMode.PureNumber);
+                parser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new SpanishNumberParserConfiguration());
             }
             else // defaulting to english
             {
-                model = new NumberModel(
-                    AgnosticNumberParserFactory.GetParser(
-                        AgnosticNumberParserType.Number,
-                        new EnglishNumberParserConfiguration()),
-                    new Recognizers.Text.Number.English.Extractors.NumberExtractor(NumberMode.PureNumber));
+                extractor = new Recognizers.Text.Number.English.Extractors.NumberExtractor(NumberMode.PureNumber);
+                parser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new EnglishNumberParserConfiguration());
             }
 
-            return model;
+            return new NumberModel(parser, extractor);
         }
 
         internal static bool ParsedWithModel(IModel model, string input, CultureInfo culture, out double result)
