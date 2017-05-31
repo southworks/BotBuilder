@@ -164,6 +164,16 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                 yield return new TermMatch(0, input.Length, 1.0, defaultValue);
             }
 
+            // use number recognition helper
+            var replacementMap = new Dictionary<string, KeyValuePair<int, int>>();
+            var modelResults = RecognizeNumberHelper.ParseInput(input, _form.Resources.Culture);
+            foreach (var modelResult in modelResults)
+            {
+                var replacement = modelResult.Resolution["value"].ToString();
+                replacementMap.Add(replacement, new KeyValuePair<int, int>(modelResult.Start, modelResult.End - modelResult.Start + 1));
+                input = Regex.Replace(input, modelResult.Text, replacement);
+            }
+
             foreach (var expression in _expressions)
             {
                 double maxWords = expression.MaxWords;
@@ -176,7 +186,15 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
                     {
                         if (ConvertSpecial(expression.Value, defaultValue, out newValue))
                         {
-                            yield return new TermMatch(group1.Index, group1.Length, 1.0, newValue);
+                            int index = group1.Index, length = group1.Length;
+                            KeyValuePair<int, int> mapping;
+                            if (replacementMap.TryGetValue(group1.Value, out mapping))
+                            {
+                                index = mapping.Key;
+                                length = mapping.Value;
+                            }
+
+                            yield return new TermMatch(index, length, 1.0, newValue);
                         }
                     }
                     if (group2.Success)
@@ -807,7 +825,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         {
             result = 0;
 
-            var parseResult = GetModelForCulture(culture).Parse(input).FirstOrDefault(r => r.TypeName.Contains("number"));
+            var parseResult = ParseInput(input, culture).FirstOrDefault(r => r.TypeName.Contains("number"));
             if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("value"))
             {
                 try
@@ -822,6 +840,11 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             }
 
             return false;
+        }
+
+        internal static IList<ModelResult> ParseInput(string input, CultureInfo culture)
+        {
+            return GetModelForCulture(culture).Parse(input);
         }
     }
 
