@@ -32,6 +32,7 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -584,8 +585,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     public sealed class RecognizeNumber<T> : RecognizePrimitive<T>
         where T : class
     {
-        private readonly IModel _model;
-
         /// <summary>
         /// Construct a numeric recognizer for a field.
         /// </summary>
@@ -597,8 +596,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             _showLimits = field.Limits(out min, out max);
             _min = (long)min;
             _max = (long)max;
-
-            _model = RecognizeNumberHelper.BuildModel(field.Form.Resources.Culture);
         }
 
         public override object[] PromptArgs()
@@ -621,7 +618,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             var result = default(TermMatch);
 
             double number;
-            if (RecognizeNumberHelper.ParsedWithModel(_model, input, _field.Form.Resources.Culture, out number))
+            if (RecognizeNumberHelper.ParsedWithModel(input, _field.Form.Resources.Culture, out number))
             {
                 long lnumber = (long)number;
                 if (number >= _min && number <= _max)
@@ -659,8 +656,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     public sealed class RecognizeDouble<T> : RecognizePrimitive<T>
         where T : class
     {
-        private readonly IModel _model;
-
         /// <summary>
         /// Construct a double or float recognizer for a field.
         /// </summary>
@@ -669,8 +664,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             : base(field)
         {
             _showLimits = field.Limits(out _min, out _max);
-
-            _model = RecognizeNumberHelper.BuildModel(field.Form.Resources.Culture);
         }
 
         public override object[] PromptArgs()
@@ -693,7 +686,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             var result = default(TermMatch);
 
             double number;
-            if (RecognizeNumberHelper.ParsedWithModel(_model, input, _field.Form.Resources.Culture, out number))
+            if (RecognizeNumberHelper.ParsedWithModel(input, _field.Form.Resources.Culture, out number))
             {
                 if (number >= _min && number <= _max)
                 {
@@ -736,8 +729,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     public sealed class RecognizeDateTime<T> : RecognizePrimitive<T>
         where T : class
     {
-        private readonly IModel _model;
-
         /// <summary>
         /// Construct a date/time recognizer.
         /// </summary>
@@ -745,7 +736,6 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         public RecognizeDateTime(IField<T> field)
             : base(field)
         {
-            _model = RecognizeDateTimeHelper.BuildModel(field.Form.Resources.Culture);
         }
 
         public override string Help(T state, object defaultValue)
@@ -760,7 +750,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             TermMatch match = null;
 
             DateTime datetime;
-            if (RecognizeDateTimeHelper.ParsedWithModel(_model, input, _field.Form.Resources.Culture, out datetime))
+            if (RecognizeDateTimeHelper.ParsedWithModel(input, _field.Form.Resources.Culture, out datetime))
             {
                 match = new TermMatch(0, input.Length, 1.0, datetime);
             }
@@ -782,12 +772,19 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     #region helpers
     internal static class RecognizeNumberHelper
     {
-        internal static IModel BuildModel(CultureInfo culture)
+        private static ConcurrentDictionary<string, IModel> modelsPerCulture;
+
+        static RecognizeNumberHelper()
+        {
+            modelsPerCulture = new ConcurrentDictionary<string, IModel>();
+        }
+
+        private static IModel BuildModel(string twoLetterISOLanguageName)
         {
             var extractor = default(IExtractor);
             var parser = default(IParser);
 
-            if (culture.TwoLetterISOLanguageName.Equals("es"))
+            if (twoLetterISOLanguageName.Equals("es"))
             {
                 extractor = new Recognizers.Text.Number.Spanish.Extractors.NumberExtractor(NumberMode.PureNumber);
                 parser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new SpanishNumberParserConfiguration());
@@ -801,11 +798,16 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             return new NumberModel(parser, extractor);
         }
 
-        internal static bool ParsedWithModel(IModel model, string input, CultureInfo culture, out double result)
+        private static IModel GetModelForCulture(CultureInfo culture)
+        {
+            return modelsPerCulture.GetOrAdd(culture.TwoLetterISOLanguageName, key => BuildModel(key)); ;
+        }
+
+        internal static bool ParsedWithModel(string input, CultureInfo culture, out double result)
         {
             result = 0;
 
-            var parseResult = model.Parse(input).FirstOrDefault(r => r.TypeName.Contains("number"));
+            var parseResult = GetModelForCulture(culture).Parse(input).FirstOrDefault(r => r.TypeName.Contains("number"));
             if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("value"))
             {
                 try
@@ -825,12 +827,19 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
 
     internal static class RecognizeDateTimeHelper
     {
-        internal static IModel BuildModel(CultureInfo culture)
+        private static ConcurrentDictionary<string, IModel> modelsPerCulture;
+
+        static RecognizeDateTimeHelper()
+        {
+            modelsPerCulture = new ConcurrentDictionary<string, IModel>();
+        }
+
+        private static IModel BuildModel(string twoLetterISOLanguageName)
         {
             var extractor = default(IExtractor);
             var parser = default(IDateTimeParser);
 
-            if (culture.TwoLetterISOLanguageName.Equals("es"))
+            if (twoLetterISOLanguageName.Equals("es"))
             {
                 parser = new BaseMergedParser(new SpanishMergedParserConfiguration());
                 extractor = new BaseMergedExtractor(new SpanishMergedExtractorConfiguration());
@@ -845,11 +854,16 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             return new DateTimeModel(parser, extractor);
         }
 
-        internal static bool ParsedWithModel(IModel model, string input, CultureInfo culture, out DateTime result)
+        private static IModel GetModelForCulture(CultureInfo culture)
+        {
+            return modelsPerCulture.GetOrAdd(culture.TwoLetterISOLanguageName, key => BuildModel(key)); ;
+        }
+
+        internal static bool ParsedWithModel(string input, CultureInfo culture, out DateTime result)
         {
             result = default(DateTime);
 
-            var parseResult = model.Parse(input).FirstOrDefault(r => r.TypeName.Contains("date"));
+            var parseResult = GetModelForCulture(culture).Parse(input).FirstOrDefault(r => r.TypeName.Contains("date"));
             if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("values"))
             {
                 var values = (parseResult.Resolution["values"] as IList<Dictionary<string, string>>).Last();
