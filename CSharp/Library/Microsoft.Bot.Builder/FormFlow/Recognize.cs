@@ -39,6 +39,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Chronic;
 using System.Threading;
+using Microsoft.Recognizers.Text;
+using Microsoft.Recognizers.Text.Number.Parsers;
+using Microsoft.Recognizers.Text.Number.Spanish.Parsers;
+using Microsoft.Recognizers.Text.Number.Models;
+using Microsoft.Recognizers.Text.Number.English.Parsers;
+using Microsoft.Recognizers.Text.Number.Extractors;
 
 namespace Microsoft.Bot.Builder.FormFlow.Advanced
 {
@@ -570,6 +576,8 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     public sealed class RecognizeNumber<T> : RecognizePrimitive<T>
         where T : class
     {
+        private readonly IModel _model;
+
         /// <summary>
         /// Construct a numeric recognizer for a field.
         /// </summary>
@@ -581,6 +589,8 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             _showLimits = field.Limits(out min, out max);
             _min = (long)min;
             _max = (long)max;
+
+            _model = RecognizeNumberHelper.BuildModel(field.Form.Resources.Culture);
         }
 
         public override object[] PromptArgs()
@@ -600,27 +610,32 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
 
         public override TermMatch Parse(string input)
         {
-            TermMatch result = null;
-            long number;
-            if (long.TryParse(input, NumberStyles.Integer, Thread.CurrentThread.CurrentUICulture.NumberFormat, out number))
+            var result = default(TermMatch);
+
+            double number;
+            if (RecognizeNumberHelper.ParsedWithModel(_model, input, _field.Form.Resources.Culture, out number))
             {
+                long lnumber = (long)number;
                 if (number >= _min && number <= _max)
                 {
                     result = new TermMatch(0, input.Length, 1.0, number);
                 }
             }
+
             return result;
         }
 
         public override string Help(T state, object defaultValue)
         {
             var prompt = new Prompter<T>(_field.Template(TemplateUsage.IntegerHelp), _field.Form, null);
+
             var args = HelpArgs(state, defaultValue);
             if (_showLimits)
             {
                 args.Add(_min);
                 args.Add(_max);
             }
+
             return prompt.Prompt(state, _field, args.ToArray()).Prompt;
         }
 
@@ -636,6 +651,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     public sealed class RecognizeDouble<T> : RecognizePrimitive<T>
         where T : class
     {
+        private readonly IModel _model;
 
         /// <summary>
         /// Construct a double or float recognizer for a field.
@@ -645,6 +661,8 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             : base(field)
         {
             _showLimits = field.Limits(out _min, out _max);
+
+            _model = RecognizeNumberHelper.BuildModel(field.Form.Resources.Culture);
         }
 
         public override object[] PromptArgs()
@@ -664,27 +682,31 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
 
         public override TermMatch Parse(string input)
         {
-            TermMatch result = null;
+            var result = default(TermMatch);
+
             double number;
-            if (double.TryParse(input, NumberStyles.Float, Thread.CurrentThread.CurrentUICulture.NumberFormat, out number))
+            if (RecognizeNumberHelper.ParsedWithModel(_model, input, _field.Form.Resources.Culture, out number))
             {
                 if (number >= _min && number <= _max)
                 {
                     result = new TermMatch(0, input.Length, 1.0, number);
                 }
             }
+
             return result;
         }
 
         public override string Help(T state, object defaultValue)
         {
             var prompt = new Prompter<T>(_field.Template(TemplateUsage.DoubleHelp), _field.Form, null);
+
             var args = HelpArgs(state, defaultValue);
             if (_showLimits)
             {
                 args.Add(_min);
                 args.Add(_max);
             }
+
             return prompt.Prompt(state, _field, args.ToArray()).Prompt;
         }
 
@@ -764,4 +786,55 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
 
         private Parser _parser;
     }
+
+    #region helpers
+    internal static class RecognizeNumberHelper
+    {
+        internal static IModel BuildModel(CultureInfo culture)
+        {
+            var model = default(IModel);
+
+            if (culture.Name.StartsWith("es"))
+            {
+                model = new NumberModel(
+                    AgnosticNumberParserFactory.GetParser(
+                        AgnosticNumberParserType.Number,
+                        new SpanishNumberParserConfiguration()),
+                    new Recognizers.Text.Number.Spanish.Extractors.NumberExtractor(NumberMode.PureNumber));
+
+            }
+            else // defaulting to english
+            {
+                model = new NumberModel(
+                    AgnosticNumberParserFactory.GetParser(
+                        AgnosticNumberParserType.Number,
+                        new EnglishNumberParserConfiguration()),
+                    new Recognizers.Text.Number.English.Extractors.NumberExtractor(NumberMode.PureNumber));
+            }
+
+            return model;
+        }
+
+        internal static bool ParsedWithModel(IModel model, string input, CultureInfo culture, out double result)
+        {
+            result = 0;
+
+            var parseResult = model.Parse(input).FirstOrDefault(r => r.TypeName.Equals("number"));
+            if (parseResult != null && parseResult.Resolution.ContainsKey("value"))
+            {
+                try
+                {
+                    result = Convert.ToDouble(parseResult.Resolution["value"], culture);
+                    return true;
+                }
+                catch
+                {
+                    // do nothing - will return false
+                }
+            }
+
+            return false;
+        }
+    }
+    #endregion
 }
