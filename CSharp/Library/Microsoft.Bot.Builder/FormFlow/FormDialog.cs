@@ -482,7 +482,10 @@ namespace Microsoft.Bot.Builder.FormFlow
                 else
                 {
                     _formState.LastPrompt = (FormPrompt)lastPrompt?.Clone();
-                    context.Wait(MessageReceived);
+                    if (lastPrompt == null || !lastPrompt.ChildSpawned)
+                    {
+                        context.Wait(MessageReceived);
+                    }
                 }
             }
             catch (Exception inner)
