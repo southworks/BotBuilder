@@ -105,6 +105,11 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         /// </summary>
         public ChoiceStyleOptions Style;
 
+        /// <summary>
+        /// A flag to notify the main dialog that you have spawned a child.
+        /// </summary>
+        public bool ChildSpawned { get; set; } = false;
+
         public override string ToString()
         {
             return $"{Prompt} {Language.BuildList(Buttons.Select(button => button.ToString()), Resources.DefaultChoiceSeparator, Resources.DefaultChoiceLastSeparator)}";
@@ -116,14 +121,14 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         /// <returns> A deep cloned instance of FormPrompt.</returns>
         public object Clone()
         {
-            var newPrompt = new FormPrompt();
-
-            newPrompt.Prompt = this.Prompt;
-            newPrompt.Description = this.Description;
-            newPrompt.Buttons = new List<DescribeAttribute>(this.Buttons);
-            newPrompt.Style = this.Style;
-
-            return newPrompt;
+            return new FormPrompt
+            {
+                Buttons = new List<DescribeAttribute>(this.Buttons),
+                ChildSpawned = this.ChildSpawned,
+                Description = this.Description,
+                Prompt = this.Prompt,
+                Style = this.Style
+            };
         }
     }
 
