@@ -110,6 +110,11 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         /// </summary>
         public bool ChildSpawned { get; set; } = false;
 
+        /// <summary>
+        /// A flag to indicate that the instance was built from a command.
+        /// </summary>
+        public bool BuiltFromCommand { get; set; } = false; 
+
         public override string ToString()
         {
             return $"{Prompt} {Language.BuildList(Buttons.Select(button => button.ToString()), Resources.DefaultChoiceSeparator, Resources.DefaultChoiceLastSeparator)}";
@@ -190,6 +195,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     /// <param name="prompt">Prompt to be posted.</param>
     /// <param name="state">State of the form.</param>
     /// <param name="field">Field being prompted or null if not a field.</param>
+    /// <param name="resume">The resume loop at the main dialog.</param>
     /// <returns>Prompt that was posted.</returns>
     public delegate Task<FormPrompt> PromptAsyncDelegate<T>(IDialogContext context, FormPrompt prompt, T state, IField<T> field, ResumeAfter<IMessageActivity> resume)
         where T : class;
