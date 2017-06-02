@@ -117,10 +117,12 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         public object Clone()
         {
             var newPrompt = new FormPrompt();
+
             newPrompt.Prompt = this.Prompt;
             newPrompt.Description = this.Description;
             newPrompt.Buttons = new List<DescribeAttribute>(this.Buttons);
             newPrompt.Style = this.Style;
+
             return newPrompt;
         }
     }
@@ -184,7 +186,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     /// <param name="state">State of the form.</param>
     /// <param name="field">Field being prompted or null if not a field.</param>
     /// <returns>Prompt that was posted.</returns>
-    public delegate Task<FormPrompt> PromptAsyncDelegate<T>(IDialogContext context, FormPrompt prompt, T state, IField<T> field)
+    public delegate Task<FormPrompt> PromptAsyncDelegate<T>(IDialogContext context, FormPrompt prompt, T state, IField<T> field, ResumeAfter<IMessageActivity> resume)
         where T : class;
 
     public static partial class Extensions

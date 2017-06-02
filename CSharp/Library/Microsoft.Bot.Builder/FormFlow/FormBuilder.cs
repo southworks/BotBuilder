@@ -67,7 +67,7 @@ namespace Microsoft.Bot.Builder.FormFlow
             }
             if (this._form._prompter == null)
             {
-                this._form._prompter = async (context, prompt, state, field) =>
+                this._form._prompter = async (context, prompt, state, field, resume) =>
                 {
                     var preamble = context.MakeMessage();
                     var promptMessage = context.MakeMessage();
@@ -344,9 +344,9 @@ namespace Microsoft.Bot.Builder.FormFlow
                 }
             }
 
-            internal override async Task<FormPrompt> Prompt(IDialogContext context, FormPrompt prompt, T state, IField<T> field)
+            internal override async Task<FormPrompt> Prompt(IDialogContext context, FormPrompt prompt, T state, IField<T> field, ResumeAfter<IMessageActivity> resume)
             {
-                return prompt == null ? prompt : await _prompter(context, prompt, state, field);
+                return prompt == null ? prompt : await _prompter(context, prompt, state, field, resume);
             }
 
             internal override OnCompletionAsyncDelegate<T> Completion

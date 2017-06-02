@@ -293,7 +293,7 @@ namespace Microsoft.Bot.Builder.FormFlow
                 FormPrompt lastPrompt = _formState.LastPrompt;
                 Func<FormPrompt, IStep<T>, Task<FormPrompt>> PostAsync = async (prompt, step) =>
                 {
-                    return await _form.Prompt(context, prompt, _state, step.Field);
+                    return await _form.Prompt(context, prompt, _state, step.Field, MessageReceived);
                 };
                 Func<IStep<T>, IEnumerable<TermMatch>, Task<bool>> DoStepAsync = async (step, matches) =>
                 {
