@@ -829,6 +829,10 @@ namespace Microsoft.Bot.Builder.FormFlow
                     next = new NextStep(new string[] { name });
                 }
             }
+
+            // indicate that the prompt was built here
+            feedback.BuiltFromCommand = true;
+
             return next;
         }
 
