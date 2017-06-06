@@ -9,9 +9,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Recognizers.Text.DateTime</RootNamespace>
     <AssemblyName>Microsoft.Recognizers.Text.DateTime</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,8 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -68,6 +66,7 @@
     <Compile Include="Chinese\Parsers\TimeParserChs.cs" />
     <Compile Include="Chinese\Parsers\TimePeriodParserChs.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="DateTimeRecognizer.cs" />
     <Compile Include="English\Extractors\EnglishDateExtractorConfiguration.cs" />
     <Compile Include="English\Extractors\EnglishDatePeriodExtractorConfiguration.cs" />
     <Compile Include="English\Extractors\EnglishDateTimeExtractorConfiguration.cs" />
@@ -163,11 +162,6 @@
     <Compile Include="Utilities\DateTimeUtility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CreatePackage.cmd" />
-    <None Include="Microsoft.Recognizers.Text.DateTime.nuspec" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.Recognizers.Text.NumberWithUnit\Microsoft.Recognizers.Text.NumberWithUnit.csproj">
       <Project>{d7ea6651-8118-478d-aaa7-437613159978}</Project>
       <Name>Microsoft.Recognizers.Text.NumberWithUnit</Name>
@@ -176,6 +170,15 @@
       <Project>{61205449-bdba-4bf3-8b24-ae059e0b1b61}</Project>
       <Name>Microsoft.Recognizers.Text.Number</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Recognizers.Text\Microsoft.Recognizers.Text.csproj">
+      <Project>{0ff232b5-8471-429f-b87f-4096576d32eb}</Project>
+      <Name>Microsoft.Recognizers.Text</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CreatePackage.cmd" />
+    <None Include="Microsoft.Recognizers.Text.DateTime.nuspec" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

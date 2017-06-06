@@ -260,6 +260,10 @@
     <XliffResource Include="MultilingualResources\Microsoft.Bot.Builder.zh-Hans.xlf" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Recognizers-Text\Microsoft.Recognizers.Text\Microsoft.Recognizers.Text.csproj">
+      <Project>{0ff232b5-8471-429f-b87f-4096576d32eb}</Project>
+      <Name>Microsoft.Recognizers.Text</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Temporary\Microsoft.Recognizers.Text.DateTime\Microsoft.Recognizers.Text.DateTime.csproj">
       <Project>{19522b81-c63f-4dd5-ab4c-674cd44d67d6}</Project>
       <Name>Microsoft.Recognizers.Text.DateTime</Name>

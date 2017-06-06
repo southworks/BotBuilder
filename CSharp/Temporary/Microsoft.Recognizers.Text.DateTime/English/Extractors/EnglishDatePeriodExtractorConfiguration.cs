@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Microsoft.Recognizers.Text.Number.English.Extractors;
-using Microsoft.Recognizers.Text.DateTime.Extractors;
+using Microsoft.Recognizers.Text.Number.English;
 
-namespace Microsoft.Recognizers.Text.DateTime.English.Extractors
+namespace Microsoft.Recognizers.Text.DateTime.English
 {
     public class EnglishDatePeriodExtractorConfiguration : IDatePeriodExtractorConfiguration
     {
@@ -77,17 +76,16 @@ namespace Microsoft.Recognizers.Text.DateTime.English.Extractors
                     MonthSuffixRegex, YearRegex),
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-        public static readonly Regex OneWordPeriodRegex =
-            new Regex(
-                @"\b(((next|this|last)\s+)?(?<month>April|Apr|August|Aug|December|Dec|February|Feb|January|Jan|July|June|March|Mar|November|Nov|October|Oct|September|Sept)|(next|last|this)\s+(weekend|week|month|year)|weekend|(month|year) to date)\b",
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
         public static readonly Regex MonthWithYear =
             new Regex(
-                $@"\b((?<month>April|Apr|August|Aug|December|Dec|February|Feb|January|Jan|July|June|March|Mar|November|Nov|October|Oct|September|Sept)(\s+of)?\s+({
-                    YearRegex}|(?<order>next|last|this)\s+year))\b",
+                $@"\b((?<month>April|Apr|August|Aug|December|Dec|February|Feb|January|Jan|July|Jul|June|Jun|March|Mar|May|November|Nov|October|Oct|September|Sep|Sept),?(\s+of)?\s+({YearRegex}|(?<order>next|last|this)\s+year))",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+        public static readonly Regex OneWordPeriodRegex =
+            new Regex(
+                @"\b(((next|this|last)\s+)?(?<month>April|Apr|August|Aug|December|Dec|February|Feb|January|Jan|July|Jul|June|Jun|March|Mar|May|November|Nov|October|Oct|September|Sep|Sept)|(next|last|this)\s+(weekend|week|month|year)|weekend|(month|year) to date)\b",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        
         public static readonly Regex MonthNumWithYear =
             new Regex($@"({YearRegex}[/\-\.]{MonthNumRegex})|({MonthNumRegex}[/\-]{YearRegex})",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
