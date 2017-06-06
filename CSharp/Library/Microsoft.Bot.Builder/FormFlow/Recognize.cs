@@ -32,7 +32,6 @@
 //
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -42,18 +41,7 @@ using System.Threading;
 
 using Microsoft.Recognizers.Text;
 using Microsoft.Recognizers.Text.DateTime;
-using Microsoft.Recognizers.Text.DateTime.English.Extractors;
-using Microsoft.Recognizers.Text.DateTime.English.Parsers;
-using Microsoft.Recognizers.Text.DateTime.Extractors;
-using Microsoft.Recognizers.Text.DateTime.Models;
-using Microsoft.Recognizers.Text.DateTime.Parsers;
-using Microsoft.Recognizers.Text.DateTime.Spanish.Extractors;
-using Microsoft.Recognizers.Text.DateTime.Spanish.Parsers;
-using Microsoft.Recognizers.Text.Number.English.Parsers;
-using Microsoft.Recognizers.Text.Number.Extractors;
-using Microsoft.Recognizers.Text.Number.Models;
-using Microsoft.Recognizers.Text.Number.Parsers;
-using Microsoft.Recognizers.Text.Number.Spanish.Parsers;
+using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Bot.Builder.FormFlow.Advanced
 {
@@ -166,7 +154,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
 
             // use number recognition helper
             var replacementMap = new Dictionary<string, KeyValuePair<int, int>>();
-            var modelResults = RecognizeNumberHelper.ParseInput(input, _form.Resources.Culture);
+            var modelResults = RecognizeNumberHelper.TryParse(input, _form.Resources.Culture);
             foreach (var modelResult in modelResults)
             {
                 var replacement = modelResult.Resolution["value"].ToString();
@@ -635,10 +623,9 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         {
             var result = default(TermMatch);
 
-            double number;
-            if (RecognizeNumberHelper.ParsedWithModel(input, _field.Form.Resources.Culture, out number))
+            long number;
+            if (RecognizeNumberHelper.TryParse(input, _field.Form.Resources.Culture, out number))
             {
-                long lnumber = (long)number;
                 if (number >= _min && number <= _max)
                 {
                     result = new TermMatch(0, input.Length, 1.0, number);
@@ -704,7 +691,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             var result = default(TermMatch);
 
             double number;
-            if (RecognizeNumberHelper.ParsedWithModel(input, _field.Form.Resources.Culture, out number))
+            if (RecognizeNumberHelper.TryParse(input, _field.Form.Resources.Culture, out number))
             {
                 if (number >= _min && number <= _max)
                 {
@@ -768,7 +755,7 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
             TermMatch match = null;
 
             DateTime datetime;
-            if (RecognizeDateTimeHelper.ParsedWithModel(input, _field.Form.Resources.Culture, out datetime))
+            if (this.TryParse(input, _field.Form.Resources.Culture, out datetime))
             {
                 match = new TermMatch(0, input.Length, 1.0, datetime);
             }
@@ -785,125 +772,73 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
         {
             return new DescribeAttribute(((DateTime)value).ToString(Thread.CurrentThread.CurrentUICulture.DateTimeFormat));
         }
-    }
 
-    #region helpers
-    internal static class RecognizeNumberHelper
-    {
-        private static ConcurrentDictionary<string, IModel> modelsPerCulture;
-
-        static RecognizeNumberHelper()
-        {
-            modelsPerCulture = new ConcurrentDictionary<string, IModel>();
-        }
-
-        private static IModel BuildModel(string twoLetterISOLanguageName)
-        {
-            var extractor = default(IExtractor);
-            var parser = default(IParser);
-
-            if (twoLetterISOLanguageName.Equals("es"))
-            {
-                extractor = new Recognizers.Text.Number.Spanish.Extractors.NumberExtractor(NumberMode.PureNumber);
-                parser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new SpanishNumberParserConfiguration());
-            }
-            else // defaulting to english
-            {
-                extractor = new Recognizers.Text.Number.English.Extractors.NumberExtractor(NumberMode.PureNumber);
-                parser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new EnglishNumberParserConfiguration());
-            }
-
-            return new NumberModel(parser, extractor);
-        }
-
-        private static IModel GetModelForCulture(CultureInfo culture)
-        {
-            return modelsPerCulture.GetOrAdd(culture.TwoLetterISOLanguageName, key => BuildModel(key)); ;
-        }
-
-        internal static bool ParsedWithModel(string input, CultureInfo culture, out double result)
-        {
-            result = 0;
-
-            var parseResult = ParseInput(input, culture).FirstOrDefault(r => r.TypeName.Contains("number"));
-            if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("value"))
-            {
-                try
-                {
-                    result = Convert.ToDouble(parseResult.Resolution["value"], culture);
-                    return true;
-                }
-                catch
-                {
-                    // do nothing - will return false
-                }
-            }
-
-            return false;
-        }
-
-        internal static IList<ModelResult> ParseInput(string input, CultureInfo culture)
-        {
-            return GetModelForCulture(culture).Parse(input);
-        }
-    }
-
-    internal static class RecognizeDateTimeHelper
-    {
-        private static ConcurrentDictionary<string, IModel> modelsPerCulture;
-
-        static RecognizeDateTimeHelper()
-        {
-            modelsPerCulture = new ConcurrentDictionary<string, IModel>();
-        }
-
-        private static IModel BuildModel(string twoLetterISOLanguageName)
-        {
-            var extractor = default(IExtractor);
-            var parser = default(IDateTimeParser);
-
-            if (twoLetterISOLanguageName.Equals("es"))
-            {
-                parser = new BaseMergedParser(new SpanishMergedParserConfiguration());
-                extractor = new BaseMergedExtractor(new SpanishMergedExtractorConfiguration());
-
-            }
-            else // defaulting to english
-            {
-                parser = new BaseMergedParser(new EnglishMergedParserConfiguration());
-                extractor = new BaseMergedExtractor(new EnglishMergedExtractorConfiguration());
-            }
-
-            return new DateTimeModel(parser, extractor);
-        }
-
-        private static IModel GetModelForCulture(CultureInfo culture)
-        {
-            return modelsPerCulture.GetOrAdd(culture.TwoLetterISOLanguageName, key => BuildModel(key)); ;
-        }
-
-        internal static bool ParsedWithModel(string input, CultureInfo culture, out DateTime result)
+        private bool TryParse(string input, CultureInfo culture, out DateTime result)
         {
             result = default(DateTime);
 
-            var parseResult = GetModelForCulture(culture).Parse(input).FirstOrDefault(r => r.TypeName.Contains("date"));
-            if (parseResult != null && parseResult.Resolution != null && parseResult.Resolution.ContainsKey("values"))
-            {
-                var values = (parseResult.Resolution["values"] as IList<Dictionary<string, string>>).Last();
+            var model = DateTimeRecognizer.GetModel(culture.Name);
+            var parsedResult = model.Parse(input).FirstOrDefault();
 
-                try
+            if (parsedResult != null && parsedResult.Resolution != null && parsedResult.Resolution.ContainsKey("values"))
+            {
+                var values = (parsedResult.Resolution["values"] as IList<Dictionary<string, string>>).Last();
+
+                if (values.ContainsKey("value"))
                 {
-                    result = Convert.ToDateTime(values["value"], culture);
-                    return true;
-                }
-                catch
-                {
-                    // do nothing - will return false
+                    return DateTime.TryParse(values["value"], culture, DateTimeStyles.None, out result);
                 }
             }
 
             return false;
         }
     }
+
+    #region Helpers
+
+    internal static class RecognizeNumberHelper
+    {
+        internal static bool TryParse(string input, CultureInfo culture, out double result)
+        {
+            result = 0;
+
+            var parsedResult = TryParse(input, culture).FirstOrDefault();
+
+            if (parsedResult != null && parsedResult.Resolution != null && parsedResult.Resolution.ContainsKey("value"))
+            {
+                return double.TryParse(
+                    parsedResult.Resolution["value"].ToString(), 
+                    NumberStyles.Float, 
+                    culture,
+                    out result);
+            }
+
+            return false;
+        }
+
+        internal static bool TryParse(string input, CultureInfo culture, out long result)
+        {
+            result = 0;
+
+            var parsedResult = TryParse(input, culture).FirstOrDefault();
+
+            if (parsedResult != null && parsedResult.Resolution != null && parsedResult.Resolution.ContainsKey("value"))
+            {
+                return long.TryParse(
+                    parsedResult.Resolution["value"].ToString(),
+                    NumberStyles.Integer,
+                    culture,
+                    out result);
+            }
+
+            return false;
+        }
+
+        internal static IList<ModelResult> TryParse(string input, CultureInfo culture)
+        {
+            return NumberRecognizer.GetNumberModel(culture.Name).Parse(input);
+        }
+    }
+
     #endregion
 }
