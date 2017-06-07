@@ -231,7 +231,7 @@
     <value>Please enter a date and time for {&amp;} {||}</value>
   </data>
   <data name="TemplateDateTimeHelp" xml:space="preserve">
-    <value>Please enter a date or time expression {?, {0}}{?, {1}}.</value>
+    <value>Please enter a date or time expression {?, {0}}{?, {1}}. Written expressions like "next Monday at 12pm" are also accepted.</value>
     <comment>0-current choice, 1-no preference</comment>
   </data>
   <data name="TemplateDouble" xml:space="preserve">
@@ -243,7 +243,7 @@
     <comment>0-number, 1-description</comment>
   </data>
   <data name="TemplateDoubleHelp" xml:space="preserve">
-    <value>Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}.</value>
+    <value>Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}. Written expressions like "one hundred and three quarters" are also accepted.</value>
     <comment>0-current choice, 1-no preference, 2-min, 3-max</comment>
   </data>
   <data name="TemplateEnumManyNumberHelp" xml:space="preserve">
@@ -305,7 +305,7 @@
     <comment>0-number, 1-description</comment>
   </data>
   <data name="TemplateIntegerHelp" xml:space="preserve">
-    <value>You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}.</value>
+    <value>You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}. Written expressions like "five hundred thirty-seven" are also accepted.</value>
     <comment>0-current choice, 1-no preference, 2-min, 3-max</comment>
   </data>
   <data name="TemplateNavigation" xml:space="preserve">

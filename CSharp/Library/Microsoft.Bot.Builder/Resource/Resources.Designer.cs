@@ -431,7 +431,7 @@ namespace Microsoft.Bot.Builder.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please enter a date or time expression {?, {0}}{?, {1}}..
+        ///   Looks up a localized string similar to Please enter a date or time expression {?, {0}}{?, {1}}. Written expressions like &quot;next Monday at 12pm&quot; are also accepted..
         /// </summary>
         public static string TemplateDateTimeHelp {
             get {
@@ -458,7 +458,7 @@ namespace Microsoft.Bot.Builder.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}..
+        ///   Looks up a localized string similar to Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}. Written expressions like &quot;one hundred and three quarters&quot; are also accepted..
         /// </summary>
         public static string TemplateDoubleHelp {
             get {
@@ -592,7 +592,7 @@ namespace Microsoft.Bot.Builder.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}..
+        ///   Looks up a localized string similar to You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}. Written expressions like &quot;five hundred thirty-seven&quot; are also accepted..
         /// </summary>
         public static string TemplateIntegerHelp {
             get {

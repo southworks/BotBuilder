@@ -149,7 +149,7 @@
           <target state="translated">Zadejte prosím datum a čas pro položku {&amp;} {||}</target>
         </trans-unit>
         <trans-unit id="TemplateDateTimeHelp" translate="yes" xml:space="preserve">
-          <source>Please enter a date or time expression {?, {0}}{?, {1}}.</source>
+          <source>Please enter a date or time expression {?, {0}}{?, {1}}. Written expressions like "next Monday at 12pm" are also accepted.</source>
           <target state="needs-review-translation">Zadejte prosím správně formátované datum nebo čas {?,{0}}{?,{1}}.</target>
           <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
           <note from="MultilingualBuild" annotates="source" priority="2">0-current choice, 1-no preference</note>
@@ -165,7 +165,7 @@
           <note from="MultilingualBuild" annotates="source" priority="2">0-number, 1-description</note>
         </trans-unit>
         <trans-unit id="TemplateDoubleHelp" translate="yes" xml:space="preserve">
-          <source>Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}.</source>
+          <source>Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}. Written expressions like "one hundred and three quarters" are also accepted.</source>
           <target state="needs-review-translation">Zadejte prosím číslo{? mezi {2:F1} a {3:F1}}{?,{0}}{?,{1}}.</target>
           <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
           <note from="MultilingualBuild" annotates="source" priority="2">0-current choice, 1-no preference, 2-min, 3-max</note>
@@ -250,7 +250,7 @@
           <note from="MultilingualBuild" annotates="source" priority="2">0-number, 1-description</note>
         </trans-unit>
         <trans-unit id="TemplateIntegerHelp" translate="yes" xml:space="preserve">
-          <source>You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}.</source>
+          <source>You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}. Written expressions like "five hundred thirty-seven" are also accepted.</source>
           <target state="needs-review-translation">Můžete zadat číslo{? mezi {2} a {3}}{?,{0}}{?,{1}}.</target>
           <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
           <note from="MultilingualBuild" annotates="source" priority="2">0-current choice, 1-no preference, 2-min, 3-max</note>

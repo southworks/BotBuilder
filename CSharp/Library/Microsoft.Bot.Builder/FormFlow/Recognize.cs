@@ -726,10 +726,8 @@ namespace Microsoft.Bot.Builder.FormFlow.Advanced
     /// </summary>
     /// <typeparam name="T">Form state.</typeparam>
     /// <remarks>
-    /// Expressions recognized are based the C# Chronic parser for English and
-    /// the C# DateTime parser otherwise.  
-    /// The Chronic parser is configured based on Thread.CurrentThread.CurrentUICultue.DateTimeFormat.ShortDatePattern.
-    /// If the pattern has d before m, then it will use EndianPrecedence of little and otherwise will use middle.
+    /// Expressions recognized are based on the 
+    /// <see href="https://github.com/Microsoft/Recognizers-Text/tree/master/Microsoft.Recognizers.Text.DateTime">Microsoft.Recognizers.Text.DateTime</see> recognizers.
     /// </remarks>
     public sealed class RecognizeDateTime<T> : RecognizePrimitive<T>
         where T : class

@@ -143,8 +143,9 @@
           <target state="final">请选择 {&amp;} 的日期和时间 {||}</target>
         </trans-unit>
         <trans-unit id="TemplateDateTimeHelp" translate="yes" xml:space="preserve">
-          <source>Please enter a date or time expression {?, {0}}{?, {1}}.</source>
-          <target state="final">请输入正确的日期时间格式 {?, {0}}{?, {1}}.</target>
+          <source>Please enter a date or time expression {?, {0}}{?, {1}}. Written expressions like "next Monday at 12pm" are also accepted.</source>
+          <target state="needs-review-translation">请输入正确的日期时间格式 {?, {0}}{?, {1}}.</target>
+          <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
           <note from="MultilingualBuild" annotates="source" priority="2">0-current choice, 1-no preference</note>
         </trans-unit>
         <trans-unit id="TemplateDouble" translate="yes" xml:space="preserve">
@@ -158,8 +159,9 @@
           <note from="MultilingualBuild" annotates="source" priority="2">0-number, 1-description</note>
         </trans-unit>
         <trans-unit id="TemplateDoubleHelp" translate="yes" xml:space="preserve">
-          <source>Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}.</source>
-          <target state="final">请选择{? {2:F1} 至  {3:F1}}{?, {0}}{?, {1}}.</target>
+          <source>Please enter a number{? between {2:F1} and {3:F1}}{?, {0}}{?, {1}}. Written expressions like "one hundred and three quarters" are also accepted.</source>
+          <target state="needs-review-translation">请选择{? {2:F1} 至  {3:F1}}{?, {0}}{?, {1}}.</target>
+          <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
           <note from="MultilingualBuild" annotates="source" priority="2">0-current choice, 1-no preference, 2-min, 3-max</note>
         </trans-unit>
         <trans-unit id="TemplateEnumManyNumberHelp" translate="yes" xml:space="preserve">
@@ -242,8 +244,9 @@
           <note from="MultilingualBuild" annotates="source" priority="2">0-number, 1-description</note>
         </trans-unit>
         <trans-unit id="TemplateIntegerHelp" translate="yes" xml:space="preserve">
-          <source>You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}.</source>
-          <target state="final">您可以选择{?  {2} 至 {3}的数字}{?, {0}}{?, {1}}.</target>
+          <source>You can enter a number{? between {2} and {3}}{?, {0}}{?, {1}}. Written expressions like "five hundred thirty-seven" are also accepted.</source>
+          <target state="needs-review-translation">您可以选择{?  {2} 至 {3}的数字}{?, {0}}{?, {1}}.</target>
+          <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
           <note from="MultilingualBuild" annotates="source" priority="2">0-current choice, 1-no preference, 2-min, 3-max</note>
         </trans-unit>
         <trans-unit id="TemplateNavigation" translate="yes" xml:space="preserve">

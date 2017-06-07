@@ -117,7 +117,7 @@
     <value>Por favor introduzca la fecha y hora para {&amp;} {||}</value>
   </data>
   <data name="TemplateDateTimeHelp" xml:space="preserve">
-    <value>Introduce una expresión de dia u hora {?, {0}} {?, {1}}.</value>
+    <value>Introduce una expresión de dia u hora {?, {0}} {?, {1}}. Expresiones como "el proximo lunes a las 12pm" son tambien aceptadas.</value>
     <comment>0-current choice, 1-no preference</comment>
   </data>
   <data name="TemplateDouble" xml:space="preserve">
@@ -129,7 +129,7 @@
     <comment>0-number, 1-description</comment>
   </data>
   <data name="TemplateDoubleHelp" xml:space="preserve">
-    <value>Introduce un número {? entre {2:F1} y {3:F1}} {?, {0}} {?, {1}}.</value>
+    <value>Introduce un número {? entre {2:F1} y {3:F1}} {?, {0}} {?, {1}}. Expresiones como "cien con setenta y cinco" son tambien aceptadas.</value>
     <comment>0-current choice, 1-no preference, 2-min, 3-max</comment>
   </data>
   <data name="TemplateEnumManyNumberHelp" xml:space="preserve">
@@ -191,7 +191,7 @@
     <comment>0-number, 1-description</comment>
   </data>
   <data name="TemplateIntegerHelp" xml:space="preserve">
-    <value>Inrtoduzca un número {? entre {2} y {3}} {?, {0}} {?, {1}}.</value>
+    <value>Inrtoduzca un número {? entre {2} y {3}} {?, {0}} {?, {1}}. Expresiones como "quinientos treinta y siete" son tambien aceptadas.</value>
     <comment>0-current choice, 1-no preference, 2-min, 3-max</comment>
   </data>
   <data name="TemplateNavigation" xml:space="preserve">
