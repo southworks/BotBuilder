@@ -13,13 +13,13 @@ This folder contains the transcript files (.chat files) used in BotBuilder-v4 fo
     E.g.:
 
     ```shell
-    # *nix
+    # On *nix:
     export BOTBUILDER_TRANSCRIPTS_LOCATION=~/projects/BotBuilder/Common/Transcripts
     ```
 
 
     ```Batchfile
-    REM Batch
+    REM On Windows:
     SET BOTBUILDER_TRANSCRIPTS_LOCATION=C:\Projects\BotBuilder\Common\Transcripts
     ```
 
