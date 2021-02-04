@@ -30,10 +30,10 @@ We prepared a simple example using the task by creating a pull request from a br
 
 ## Azure Pipelines Setup
 
-![PipelineSettings1](https://user-images.githubusercontent.com/42191764/59932138-ef855a80-941c-11e9-9d64-e62c46788ce2.png)
+![PipelineSettings1](./media/guide-01.png)
 
-![PipelineSettings2](https://user-images.githubusercontent.com/42191764/59932560-d4671a80-941d-11e9-9e8f-ed67821de248.png)
+![PipelineSettings2](./media/guide-02.png)
 
-![PipelineSettings3](https://user-images.githubusercontent.com/42191764/59932624-f9f42400-941d-11e9-861b-a184700c5820.png)
+![PipelineSettings3](./media/guide-03.png)
 
-![PipelineResults](https://user-images.githubusercontent.com/42191764/59930566-83edbe00-9419-11e9-9f84-571c719ce706.png)
+![PipelineResults](./media/guide-04.png)
