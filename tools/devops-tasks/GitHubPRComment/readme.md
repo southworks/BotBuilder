@@ -18,11 +18,11 @@ Number of the pull request you want to comment. Use `$(System.PullRequest.PullRe
 
 ### Path to the file/s
 
-Path to the file/s that you want to get the PR comments from. If you specify a folder, it will pick all the files that have the specified extension inside that folder
+Path to the file/s that you want to get the PR comments from. If you specify a folder, it will pick all the files that have the specified extension inside that folder.
 
 ### Use sub-folders
 
-Checking this option will enable to search for all the files of the specified extensions in all the folders and sub-folders contained in the previously selected path
+Checking this option will enable to search for all the files of the specified extensions in all the folders and sub-folders contained in the previously selected path.
 
 ### Basic Example
 
