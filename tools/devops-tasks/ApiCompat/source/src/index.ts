@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 import { setResult, TaskResult } from 'azure-pipelines-task-lib';
 import { ApiCompat } from './ApiCompat'
 import { Configuration } from './Configuration'
