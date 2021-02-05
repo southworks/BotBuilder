@@ -14,9 +14,9 @@ const clientWithAuth = new gitClient({
 });
 
 async function run() {
-    var files = getFilesFromDir(taskLibrary.getInput('bodyFilePath'), '.' + taskLibrary.getInput('extension'), taskLibrary.getBoolInput('getSubFolders'))
-    var message = combineMessageBody(files);
-    var repo = taskLibrary.getInput('repository').split('/');
+    const files = getFilesFromDir(taskLibrary.getInput('bodyFilePath'), '.' + taskLibrary.getInput('extension'), taskLibrary.getBoolInput('getSubFolders'))
+    const message = combineMessageBody(files);
+    const repo = taskLibrary.getInput('repository').split('/');
 
     const comment: gitClient.IssuesCreateCommentParams = {
         owner: repo[0],
@@ -38,17 +38,17 @@ const getFilesFromDir = (filePath: string, extName: string, recursive: boolean):
         console.log("File path does not exist: ",filePath);
         return [];
     }
-    var result: string[] = [];
+    const result: string[] = [];
     iterateFilesFromDir(filePath, extName, recursive, result);
 
     return result;
 }
 
 const iterateFilesFromDir = (filePath: string, extName: string, recursive: boolean, result: string[]): string[] => {
-    var files = fs.readdirSync(filePath);
+    const files = fs.readdirSync(filePath);
     files.forEach(file => {
-        var fileName = path.join(filePath,file);
-        var isFolder = fs.lstatSync(fileName);
+        const fileName = path.join(filePath,file);
+        const isFolder = fs.lstatSync(fileName);
         if (recursive && isFolder.isDirectory()){
             result = iterateFilesFromDir(fileName, extName, recursive, result);
         }
@@ -62,9 +62,9 @@ const iterateFilesFromDir = (filePath: string, extName: string, recursive: boole
 }
 
 const combineMessageBody = (files: string[]): string => {
-    var body:string = "";
+    let body = "";
     files.forEach(file => {
-        var bodyFile = fs.readFileSync(file);
+        const bodyFile = fs.readFileSync(file);
        // var fileObject = JSON.parse(bodyFile.toString());
        // body += fileObject["body"].toString() + "\r\n";
        body += bodyFile + "\r\n";
