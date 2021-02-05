@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 import taskLibrary = require('azure-pipelines-task-lib/task');
 import gitClient = require('@octokit/rest');
 import path = require('path');
